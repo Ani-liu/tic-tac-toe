@@ -1,8 +1,8 @@
 def print_board(board):
-    print("---------")
+    print("-------------")
     for row in board:
         print("| " + " | ".join(row) + " |")
-        print("---------")
+        print("-------------")
 
 def check_winner(board, player):
     # Check rows, columns and diagonals
