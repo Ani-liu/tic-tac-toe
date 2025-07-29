@@ -1,4 +1,5 @@
 import os
+import random
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -26,15 +27,25 @@ def check_winner(board, player):
         return True
     return False
 
-def welcome(x_limit, o_limit):
+def welcome(x_limit, o_limit, vs_ai):
     clear_screen()
     print("\033[95mWelcome to Disappearing Tic Tac Toe!\033[0m")
     print("Instructions:")
     print(" - Enter your move as row and column numbers separated by a space (e.g., 2 3).")
     print(f" - Only {x_limit} X's and {o_limit} O's can be on the board at once.")
-    print(" - When a player exceeds their limit, their oldest mark disappears.\n")
+    print(" - When a player exceeds their limit, their oldest mark disappears.")
+    if vs_ai:
+        print(" - You are playing against the computer (O).\n")
+    else:
+        print(" - You are playing against another player.\n")
+
+def get_ai_move(board):
+    empty = [(i, j) for i in range(3) for j in range(3) if board[i][j] == " "]
+    return random.choice(empty) if empty else (None, None)
 
 def tic_tac_toe():
+    mode = input("Play against (1) another player or (2) computer? Enter 1 or 2: ").strip()
+    vs_ai = (mode == "2")
     try:
         x_limit = int(input("How many X's can be on the board before the oldest disappears? (default 3): ") or 3)
         if x_limit < 1:
@@ -49,7 +60,10 @@ def tic_tac_toe():
         o_limit = 3
 
     player1 = input("Enter name for Player X: ") or "Player X"
-    player2 = input("Enter name for Player O: ") or "Player O"
+    if vs_ai:
+        player2 = "Computer"
+    else:
+        player2 = input("Enter name for Player O: ") or "Player O"
     players = {"X": player1, "O": player2}
 
     while True:
@@ -59,28 +73,33 @@ def tic_tac_toe():
         move_counter = 1  # unique age for each move
         current_player = "X"
         clear_screen()
-        welcome(x_limit, o_limit)
+        welcome(x_limit, o_limit, vs_ai)
         print(f"{players['X']} (X) vs {players['O']} (O)\n")
         while True:
             print_board(board)
-            try:
-                move = input(f"{players[current_player]} ({current_player}), enter your move (row col): ")
-                row, col = map(int, move.strip().split())
-                row -= 1
-                col -= 1
-                if not (0 <= row < 3 and 0 <= col < 3):
-                    print("Row and column must be between 1 and 3.")
+            if vs_ai and current_player == "O":
+                # Computer's turn
+                row, col = get_ai_move(board)
+                print(f"Computer (O) moves at {row+1} {col+1}")
+            else:
+                try:
+                    move = input(f"{players[current_player]} ({current_player}), enter your move (row col): ")
+                    row, col = map(int, move.strip().split())
+                    row -= 1
+                    col -= 1
+                except (ValueError, IndexError):
+                    print("Invalid input. Please enter row and column numbers between 1 and 3.")
                     continue
-                if board[row][col] != " ":
-                    print("Cell already taken. Try again.")
-                    continue
-                board[row][col] = current_player
-                ages[row][col] = move_counter
-                owners[row][col] = current_player
-                move_counter += 1
-            except (ValueError, IndexError):
-                print("Invalid input. Please enter row and column numbers between 1 and 3.")
+            if not (0 <= row < 3 and 0 <= col < 3):
+                print("Row and column must be between 1 and 3.")
                 continue
+            if board[row][col] != " ":
+                print("Cell already taken. Try again.")
+                continue
+            board[row][col] = current_player
+            ages[row][col] = move_counter
+            owners[row][col] = current_player
+            move_counter += 1
 
             # Remove oldest if player exceeds their limit
             player_limit = x_limit if current_player == "X" else o_limit
@@ -97,7 +116,7 @@ def tic_tac_toe():
                 owners[i][j] = ""
 
             clear_screen()
-            welcome(x_limit, o_limit)
+            welcome(x_limit, o_limit, vs_ai)
             print(f"{players['X']} (X) vs {players['O']} (O)\n")
             if check_winner(board, current_player):
                 print_board(board)
