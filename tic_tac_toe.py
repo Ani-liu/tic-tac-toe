@@ -1,5 +1,6 @@
 import os
 import random
+import time
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -87,9 +88,10 @@ def minimax(board, is_maximizing):
         return best_score
 
 def tic_tac_toe():
-    mode = input("Play against (1) another player or (2) computer? Enter 1 or 2: ").strip()
+    mode = input("Play against (1) another player, (2) computer, or (3) watch AI vs AI? Enter 1, 2, or 3: ").strip()
     vs_ai = (mode == "2")
-    if vs_ai:
+    ai_vs_ai = (mode == "3")
+    if vs_ai or ai_vs_ai:
         difficulty = input("Choose computer difficulty: (1) Easy or (2) Hard: ").strip()
         if difficulty not in ("1", "2"):
             difficulty = "1"
@@ -108,11 +110,8 @@ def tic_tac_toe():
     except ValueError:
         o_limit = 3
 
-    player1 = input("Enter name for Player X: ") or "Player X"
-    if vs_ai:
-        player2 = "Computer"
-    else:
-        player2 = input("Enter name for Player O: ") or "Player O"
+    player1 = "AI X" if ai_vs_ai else (input("Enter name for Player X: ") or "Player X")
+    player2 = "AI O" if ai_vs_ai else ("Computer" if vs_ai else (input("Enter name for Player O: ") or "Player O"))
     players = {"X": player1, "O": player2}
 
     while True:
@@ -122,14 +121,15 @@ def tic_tac_toe():
         move_counter = 1  # unique age for each move
         current_player = "X"
         clear_screen()
-        welcome(x_limit, o_limit, vs_ai)
+        welcome(x_limit, o_limit, vs_ai or ai_vs_ai)
         print(f"{players['X']} (X) vs {players['O']} (O)\n")
         while True:
             print_board(board)
-            if vs_ai and current_player == "O":
-                # Computer's turn
+            if (vs_ai and current_player == "O") or ai_vs_ai:
+                # Computer's turn (for both X and O in AI vs AI)
                 row, col = get_ai_move(board, difficulty)
-                print(f"Computer (O) moves at {row+1} {col+1}")
+                print(f"{players[current_player]} ({current_player}) moves at {row+1} {col+1}")
+                time.sleep(1.2)  # Slow down AI turns for visibility
             else:
                 try:
                     move = input(f"{players[current_player]} ({current_player}), enter your move (row col): ")
@@ -165,7 +165,7 @@ def tic_tac_toe():
                 owners[i][j] = ""
 
             clear_screen()
-            welcome(x_limit, o_limit, vs_ai)
+            welcome(x_limit, o_limit, vs_ai or ai_vs_ai)
             print(f"{players['X']} (X) vs {players['O']} (O)\n")
             if check_winner(board, current_player):
                 print_board(board)
