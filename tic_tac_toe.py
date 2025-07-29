@@ -127,7 +127,54 @@ def tic_tac_toe():
             print_board(board)
             if (vs_ai and current_player == "O") or ai_vs_ai:
                 # Computer's turn (for both X and O in AI vs AI)
-                row, col = get_ai_move(board, difficulty)
+                if ai_vs_ai and difficulty == "2":
+                    # Both AIs use minimax in hard mode
+                    if current_player == "X":
+                        # X tries to maximize its win (invert minimax for X)
+                        def get_x_move(board):
+                            empty = [(i, j) for i in range(3) for j in range(3) if board[i][j] == " "]
+                            best_score = -float('inf')
+                            best_move = None
+                            for (i, j) in empty:
+                                board[i][j] = "X"
+                                score = minimax_x(board, False)
+                                board[i][j] = " "
+                                if score > best_score:
+                                    best_score = score
+                                    best_move = (i, j)
+                            return best_move if best_move else (None, None)
+                        def minimax_x(board, is_maximizing):
+                            if check_winner(board, "X"):
+                                return 1
+                            if check_winner(board, "O"):
+                                return -1
+                            if all(cell != " " for row in board for cell in row):
+                                return 0
+                            if is_maximizing:
+                                best_score = -float('inf')
+                                for i in range(3):
+                                    for j in range(3):
+                                        if board[i][j] == " ":
+                                            board[i][j] = "X"
+                                            score = minimax_x(board, False)
+                                            board[i][j] = " "
+                                            best_score = max(score, best_score)
+                                return best_score
+                            else:
+                                best_score = float('inf')
+                                for i in range(3):
+                                    for j in range(3):
+                                        if board[i][j] == " ":
+                                            board[i][j] = "O"
+                                            score = minimax_x(board, True)
+                                            board[i][j] = " "
+                                            best_score = min(score, best_score)
+                                return best_score
+                        row, col = get_x_move(board)
+                    else:
+                        row, col = get_ai_move(board, difficulty)
+                else:
+                    row, col = get_ai_move(board, difficulty)
                 print(f"{players[current_player]} ({current_player}) moves at {row+1} {col+1}")
                 time.sleep(1.2)  # Slow down AI turns for visibility
             else:
