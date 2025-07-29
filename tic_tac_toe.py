@@ -39,13 +39,62 @@ def welcome(x_limit, o_limit, vs_ai):
     else:
         print(" - You are playing against another player.\n")
 
-def get_ai_move(board):
+def get_ai_move(board, difficulty):
     empty = [(i, j) for i in range(3) for j in range(3) if board[i][j] == " "]
-    return random.choice(empty) if empty else (None, None)
+    if difficulty == "1":  # Easy
+        return random.choice(empty) if empty else (None, None)
+    else:  # Hard
+        # Minimax for best move
+        best_score = -float('inf')
+        best_move = None
+        for (i, j) in empty:
+            board[i][j] = "O"
+            score = minimax(board, False)
+            board[i][j] = " "
+            if score > best_score:
+                best_score = score
+                best_move = (i, j)
+        return best_move if best_move else (None, None)
+
+def minimax(board, is_maximizing):
+    winner = None
+    if check_winner(board, "O"):
+        return 1
+    if check_winner(board, "X"):
+        return -1
+    if all(cell != " " for row in board for cell in row):
+        return 0
+
+    if is_maximizing:
+        best_score = -float('inf')
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == " ":
+                    board[i][j] = "O"
+                    score = minimax(board, False)
+                    board[i][j] = " "
+                    best_score = max(score, best_score)
+        return best_score
+    else:
+        best_score = float('inf')
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == " ":
+                    board[i][j] = "X"
+                    score = minimax(board, True)
+                    board[i][j] = " "
+                    best_score = min(score, best_score)
+        return best_score
 
 def tic_tac_toe():
     mode = input("Play against (1) another player or (2) computer? Enter 1 or 2: ").strip()
     vs_ai = (mode == "2")
+    if vs_ai:
+        difficulty = input("Choose computer difficulty: (1) Easy or (2) Hard: ").strip()
+        if difficulty not in ("1", "2"):
+            difficulty = "1"
+    else:
+        difficulty = None
     try:
         x_limit = int(input("How many X's can be on the board before the oldest disappears? (default 3): ") or 3)
         if x_limit < 1:
@@ -79,7 +128,7 @@ def tic_tac_toe():
             print_board(board)
             if vs_ai and current_player == "O":
                 # Computer's turn
-                row, col = get_ai_move(board)
+                row, col = get_ai_move(board, difficulty)
                 print(f"Computer (O) moves at {row+1} {col+1}")
             else:
                 try:
