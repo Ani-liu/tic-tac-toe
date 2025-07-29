@@ -26,20 +26,26 @@ def check_winner(board, player):
         return True
     return False
 
-def welcome(disappear_after):
+def welcome(x_disappear, o_disappear):
     clear_screen()
     print("\033[95mWelcome to Disappearing Tic Tac Toe!\033[0m")
     print("Instructions:")
     print(" - Enter your move as row and column numbers separated by a space (e.g., 2 3).")
-    print(f" - Each move disappears after {disappear_after} turns, so keep playing until someone wins!\n")
+    print(f" - X disappears after {x_disappear} turns, O disappears after {o_disappear} turns.\n")
 
 def tic_tac_toe():
     try:
-        disappear_after = int(input("How many turns should a move last before disappearing? (default 3): ") or 3)
-        if disappear_after < 1:
-            disappear_after = 3
+        x_disappear = int(input("How many turns should X last before disappearing? (default 3): ") or 3)
+        if x_disappear < 1:
+            x_disappear = 3
     except ValueError:
-        disappear_after = 3
+        x_disappear = 3
+    try:
+        o_disappear = int(input("How many turns should O last before disappearing? (default 3): ") or 3)
+        if o_disappear < 1:
+            o_disappear = 3
+    except ValueError:
+        o_disappear = 3
 
     player1 = input("Enter name for Player X: ") or "Player X"
     player2 = input("Enter name for Player O: ") or "Player O"
@@ -48,10 +54,10 @@ def tic_tac_toe():
     while True:
         board = [[" " for _ in range(3)] for _ in range(3)]
         ages = [[0 for _ in range(3)] for _ in range(3)]  # track age of each move
+        owners = [["" for _ in range(3)] for _ in range(3)]  # track who placed each move
         current_player = "X"
-        turn_count = 0
         clear_screen()
-        welcome(disappear_after)
+        welcome(x_disappear, o_disappear)
         print(f"{players['X']} (X) vs {players['O']} (O)\n")
         while True:
             print_board(board)
@@ -68,30 +74,34 @@ def tic_tac_toe():
                     continue
                 board[row][col] = current_player
                 ages[row][col] = 1  # set age to 1 for new move
+                owners[row][col] = current_player
             except (ValueError, IndexError):
                 print("Invalid input. Please enter row and column numbers between 1 and 3.")
                 continue
 
-            # Age all moves and remove those that are too old
+            # Age all moves and remove those that are too old, per player
             for i in range(3):
                 for j in range(3):
                     if board[i][j] != " ":
                         ages[i][j] += 1
-                        if ages[i][j] > disappear_after:
+                        if owners[i][j] == "X" and ages[i][j] > x_disappear:
                             board[i][j] = " "
                             ages[i][j] = 0
+                            owners[i][j] = ""
+                        elif owners[i][j] == "O" and ages[i][j] > o_disappear:
+                            board[i][j] = " "
+                            ages[i][j] = 0
+                            owners[i][j] = ""
 
             clear_screen()
-            welcome(disappear_after)
+            welcome(x_disappear, o_disappear)
             print(f"{players['X']} (X) vs {players['O']} (O)\n")
             if check_winner(board, current_player):
                 print_board(board)
                 print(f"\033[92mCongratulations, {players[current_player]} ({current_player}) wins!\033[0m")
                 break
-            # No draw check, since the board never fills up
 
             current_player = "O" if current_player == "X" else "X"
-            turn_count += 1
 
         replay = input("Play again? (y/n): ").strip().lower()
         if replay != "y":
