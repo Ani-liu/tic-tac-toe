@@ -26,25 +26,25 @@ def check_winner(board, player):
         return True
     return False
 
-def is_full(board):
-    return all([cell != " " for row in board for cell in row])
-
 def welcome():
     clear_screen()
     print("\033[95mWelcome to Creative Tic Tac Toe!\033[0m")
     print("Instructions:")
     print(" - Enter your move as row and column numbers separated by a space (e.g., 2 3).")
-    print(" - First player to get 3 in a row wins!\n")
+    print(" - Each move disappears after 3 turns, so keep playing until someone wins!\n")
 
 def tic_tac_toe():
     welcome()
     player1 = input("Enter name for Player X: ") or "Player X"
     player2 = input("Enter name for Player O: ") or "Player O"
     players = {"X": player1, "O": player2}
+    disappear_after = 3  # moves disappear after 3 turns
 
     while True:
         board = [[" " for _ in range(3)] for _ in range(3)]
+        ages = [[0 for _ in range(3)] for _ in range(3)]  # track age of each move
         current_player = "X"
+        turn_count = 0
         clear_screen()
         welcome()
         print(f"{players['X']} (X) vs {players['O']} (O)\n")
@@ -62,9 +62,19 @@ def tic_tac_toe():
                     print("Cell already taken. Try again.")
                     continue
                 board[row][col] = current_player
+                ages[row][col] = 1  # set age to 1 for new move
             except (ValueError, IndexError):
                 print("Invalid input. Please enter row and column numbers between 1 and 3.")
                 continue
+
+            # Age all moves and remove those that are too old
+            for i in range(3):
+                for j in range(3):
+                    if board[i][j] != " ":
+                        ages[i][j] += 1
+                        if ages[i][j] > disappear_after:
+                            board[i][j] = " "
+                            ages[i][j] = 0
 
             clear_screen()
             welcome()
@@ -73,11 +83,10 @@ def tic_tac_toe():
                 print_board(board)
                 print(f"\033[92mCongratulations, {players[current_player]} ({current_player}) wins!\033[0m")
                 break
-            if is_full(board):
-                print_board(board)
-                print("\033[93mIt's a draw!\033[0m")
-                break
+            # No draw check, since the board never fills up
+
             current_player = "O" if current_player == "X" else "X"
+            turn_count += 1
 
         replay = input("Play again? (y/n): ").strip().lower()
         if replay != "y":
