@@ -26,19 +26,24 @@ def check_winner(board, player):
         return True
     return False
 
-def welcome():
+def welcome(disappear_after):
     clear_screen()
-    print("\033[95mWelcome to Creative Tic Tac Toe!\033[0m")
+    print("\033[95mWelcome to Disappearing Tic Tac Toe!\033[0m")
     print("Instructions:")
     print(" - Enter your move as row and column numbers separated by a space (e.g., 2 3).")
-    print(" - Each move disappears after 3 turns, so keep playing until someone wins!\n")
+    print(f" - Each move disappears after {disappear_after} turns, so keep playing until someone wins!\n")
 
 def tic_tac_toe():
-    welcome()
+    try:
+        disappear_after = int(input("How many turns should a move last before disappearing? (default 3): ") or 3)
+        if disappear_after < 1:
+            disappear_after = 3
+    except ValueError:
+        disappear_after = 3
+
     player1 = input("Enter name for Player X: ") or "Player X"
     player2 = input("Enter name for Player O: ") or "Player O"
     players = {"X": player1, "O": player2}
-    disappear_after = 3  # moves disappear after 3 turns
 
     while True:
         board = [[" " for _ in range(3)] for _ in range(3)]
@@ -46,7 +51,7 @@ def tic_tac_toe():
         current_player = "X"
         turn_count = 0
         clear_screen()
-        welcome()
+        welcome(disappear_after)
         print(f"{players['X']} (X) vs {players['O']} (O)\n")
         while True:
             print_board(board)
@@ -77,7 +82,7 @@ def tic_tac_toe():
                             ages[i][j] = 0
 
             clear_screen()
-            welcome()
+            welcome(disappear_after)
             print(f"{players['X']} (X) vs {players['O']} (O)\n")
             if check_winner(board, current_player):
                 print_board(board)
