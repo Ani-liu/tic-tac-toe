@@ -98,17 +98,17 @@ def tic_tac_toe():
     else:
         difficulty = None
     try:
-        x_limit = int(input("How many X's can be on the board before the oldest disappears? (default 3): ") or 3)
+        x_limit = int(input("How many X's can be on the board before the oldest disappears? (default 5): ") or 5)
         if x_limit < 1:
-            x_limit = 3
+            x_limit = 5
     except ValueError:
-        x_limit = 3
+        x_limit = 5
     try:
-        o_limit = int(input("How many O's can be on the board before the oldest disappears? (default 3): ") or 3)
+        o_limit = int(input("How many O's can be on the board before the oldest disappears? (default 5): ") or 5)
         if o_limit < 1:
-            o_limit = 3
+            o_limit = 5
     except ValueError:
-        o_limit = 3
+        o_limit = 5
 
     player1 = "AI X" if ai_vs_ai else (input("Enter name for Player X: ") or "Player X")
     player2 = "AI O" if ai_vs_ai else ("Computer" if vs_ai else (input("Enter name for Player O: ") or "Player O"))
